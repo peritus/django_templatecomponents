@@ -22,211 +22,210 @@ _COMPRESS_CSS = getattr(settings, 'TEMPLATECOMPONENTS_COMPRESS_CSS', not setting
 compress_js = jsmin
 
 try:
-  _YUICOMPRESSOR_JAR = settings.TEMPLATECOMPONENTS_PATH_TO_YUICOMPRESSOR_JAR
-  if not exists(_YUICOMPRESSOR_JAR):
-    raise ImproperlyConfigured, _YUICOMPRESSOR_JAR + " not found."
+    _YUICOMPRESSOR_JAR = settings.TEMPLATECOMPONENTS_PATH_TO_YUICOMPRESSOR_JAR
+    if not exists(_YUICOMPRESSOR_JAR):
+        raise ImproperlyConfigured, _YUICOMPRESSOR_JAR + " not found."
 
-  _YUICOMPRESSOR_OPTIONS = getattr(settings, 'TEMPLATECOMPONENTS_OPTIONS', '')
+    _YUICOMPRESSOR_OPTIONS = getattr(settings, 'TEMPLATECOMPONENTS_OPTIONS', '')
 
-  def _compress_yui(string, type):
-    cmdline = "java -jar %s --type %s %s" % (_YUICOMPRESSOR_JAR, type, _YUICOMPRESSOR_OPTIONS)
-    readstream, writestream = popen2(cmdline)
-    writestream.write(string)
-    writestream.close()
-    return readstream.read()
+    def _compress_yui(string, type):
+        cmdline = "java -jar %s --type %s %s" % (_YUICOMPRESSOR_JAR, type, _YUICOMPRESSOR_OPTIONS)
+        readstream, writestream = popen2(cmdline)
+        writestream.write(string)
+        writestream.close()
+        return readstream.read()
 
-  compress_js = lambda s: _compress_yui(s, 'js')
-  compress_css = lambda s: _compress_yui(s, 'css')
+    compress_js = lambda s: _compress_yui(s, 'js')
+    compress_css = lambda s: _compress_yui(s, 'css')
 
 except AttributeError:
-  if _COMPRESS_CSS:
-    raise ImproperlyConfigured, (
-      'To use css compression, you need to specify a full path to yuicompressor.jar'
-      'using settings.TEMPLATECOMPONENTS_PATH_TO_YUICOMPRESSOR_JAR'
-    )
+    if _COMPRESS_CSS:
+        raise ImproperlyConfigured, (
+          'To use css compression, you need to specify a full path to yuicompressor.jar'
+          'using settings.TEMPLATECOMPONENTS_PATH_TO_YUICOMPRESSOR_JAR'
+        )
 
 if not _COMPRESS_CSS:
-  compress_css = lambda s: s
+    compress_css = lambda s: s
 
 if not _COMPRESS_JAVASCRIPT:
-  compress_js = lambda s: s
+    compress_js = lambda s: s
 
 _hash = lambda s: sha(s.encode("utf-8")).digest()
 
 BLOCKS = {}
 
 class TemplateComponentBucket(list):
-  def __repr__(self):
-    return self.__str__()
+    def __repr__(self):
+        return self.__str__()
 
-  def __str__(self):
-    self.sort(lambda x, y: y.priority - x.priority)
-    return "\n".join(str(b) for b in self)
+    def __str__(self):
+        self.sort(lambda x, y: y.priority - x.priority)
+        return "\n".join(str(b) for b in self)
 
-  def available(self):
-    sofar = set()
-    for block in self.without_inline():
-      for group in block.groups:
-        sofar.add((group, block.blocktag))
+    def available(self):
+        sofar = set()
+        for block in self.without_inline():
+            for group in block.groups:
+                sofar.add((group, block.blocktag))
 
-    return list(sofar)
+        return list(sofar)
 
-  def without_inline(self):
-    return TemplateComponentBucket(
-      block for block in self if 'inline' not in block.groups
-    )
+    def without_inline(self):
+        return TemplateComponentBucket(
+          block for block in self if 'inline' not in block.groups
+        )
 
-  def filter(self, type):
-    assert type in TemplateComponentBlock.BLOCKTAGS
-    return TemplateComponentBucket(
-      block for block in self if block.blocktag == type
-    )
+    def filter(self, type):
+        assert type in TemplateComponentBlock.BLOCKTAGS
+        return TemplateComponentBucket(
+          block for block in self if block.blocktag == type
+        )
 
-  def group(self, group):
-    if group == None:
-      return TemplateComponentBucket(
-        block for block in self if len(block.groups) == 0
-      )
-    
-    return TemplateComponentBucket(
-      block for block in self if group in block.groups
-    )
+    def group(self, group):
+        if group == None:
+            return TemplateComponentBucket(
+              block for block in self if len(block.groups) == 0
+            )
 
-  def compress(self):
-    if len(self) == 0:
-      return ''
+        return TemplateComponentBucket(
+          block for block in self if group in block.groups
+        )
 
-    type = self[0].blocktag
+    def compress(self):
+        if len(self) == 0:
+            return ''
 
-    for b in self:
-      assert b.blocktag == type, 'Must be of same type!'
+        type = self[0].blocktag
 
-    if type == 'javascript':
-      return compress_js(str(self))
-    elif type == 'css':
-      return compress_css(str(self))
+        for b in self:
+            assert b.blocktag == type, 'Must be of same type!'
 
-    assert False, 'never reach this'
+        if type == 'javascript':
+            return compress_js(str(self))
+        elif type == 'css':
+            return compress_css(str(self))
+
+        assert False, 'never reach this'
 
 
 class TemplateComponentBlock:
 
-  BLOCKTAGS = 'css', 'javascript'
+    BLOCKTAGS = 'css', 'javascript'
 
-  def __init__(self, text, blocktag, groups=[], priority=0, origin=''):
-    self.text = text
-    self.blocktag = blocktag
-    self.priority = priority
-    self.origin = origin
+    def __init__(self, text, blocktag, groups=[], priority=0, origin=''):
+        self.text = text
+        self.blocktag = blocktag
+        self.priority = priority
+        self.origin = origin
 
-    if 'inline' in groups and len(groups) > 1:
-      raise ImproperlyConfigured, (
-        "Error in %s: If a template component block has "
-        "group inline, it can't have other groups.") % self.origin
+        if 'inline' in groups and len(groups) > 1:
+            raise ImproperlyConfigured, (
+              "Error in %s: If a template component block has "
+              "group inline, it can't have other groups.") % self.origin
 
-    self.groups = groups
+        self.groups = groups
 
-  def __repr__(self):
-    return self.__str__()
+    def __repr__(self):
+        return self.__str__()
 
-  def __str__(self):
-    origin = ''
-    if self.origin:
-      origin = " from template '%s'" % self.origin
+    def __str__(self):
+        origin = ''
+        if self.origin:
+            origin = " from template '%s'" % self.origin
 
-    priority = ''
-    if self.priority:
-      priority = ' with priority %d' % self.priority
+        priority = ''
+        if self.priority:
+            priority = ' with priority %d' % self.priority
 
-    groups = ''
-    if self.groups:
-      groups = ' with groups ' + ', '.join(self.groups)
+        groups = ''
+        if self.groups:
+            groups = ' with groups ' + ', '.join(self.groups)
 
-    return "/* extracted %s%s%s%s */\n%s" % (
-      self.blocktag, origin, priority, groups, self.text 
-    )
+        return "/* extracted %s%s%s%s */\n%s" % (
+          self.blocktag, origin, priority, groups, self.text
+        )
 
-  @classmethod
-  def _parse_parameters(_, parameters):
-    priority = 0
-    groups = []
-    for p in parameters:
-      try:
-        priority = int(p)
-      except ValueError:
-        groups.append(p)
+    @classmethod
+    def _parse_parameters(_, parameters):
+        priority = 0
+        groups = []
+        for p in parameters:
+            try:
+                priority = int(p)
+            except ValueError:
+                groups.append(p)
 
-    return {
-      'priority': priority,
-      'groups': groups,
-    }
+        return {
+          'priority': priority,
+          'groups': groups,
+        }
 
-  @classmethod
-  def from_template(cls, templatepath):
-    template_string, _ = load_template_source(templatepath)
+    @classmethod
+    def from_template(cls, templatepath):
+        template_string, _ = load_template_source(templatepath)
 
-    # Cache to speed things up.
-    hash = _hash("_".join([templatepath, template_string]))
-    if hash in BLOCKS:
-      return BLOCKS[hash]
+        # Cache to speed things up.
+        hash = _hash("_".join([templatepath, template_string]))
+        if hash in BLOCKS:
+            return BLOCKS[hash]
 
-    try:
-      return cls.from_string(template_string, origin=templatepath)
-    except UnicodeDecodeError:
-      return "/* could not load %s as a template */\n" % templatepath
+        try:
+            return cls.from_string(template_string, origin=templatepath)
+        except UnicodeDecodeError:
+            return "/* could not load %s as a template */\n" % templatepath
 
-  @classmethod
-  def from_string(cls, template_soup, origin=''):
-    result = TemplateComponentBucket()
+    @classmethod
+    def from_string(cls, template_soup, origin=''):
+        result = TemplateComponentBucket()
 
-    l = Lexer(template_soup, origin)
-    within = None
-    for m in l.tokenize():
-      if m.token_type == TOKEN_BLOCK:
+        l = Lexer(template_soup, origin)
+        within = None
+        for m in l.tokenize():
+            if m.token_type == TOKEN_BLOCK:
 
-        tag = m.split_contents()[0]
+                tag = m.split_contents()[0]
 
-        if tag not in cls.BLOCKTAGS + tuple(('end' + t) for t in cls.BLOCKTAGS):
-          continue; # shortcicuit here
+                if tag not in cls.BLOCKTAGS + tuple(('end' + t) for t in cls.BLOCKTAGS):
+                    continue; # shortcicuit here
 
-        prop = cls._parse_parameters(m.split_contents()[1:])
+                prop = cls._parse_parameters(m.split_contents()[1:])
 
-        if tag in cls.BLOCKTAGS:
-          within = tag
-        elif tag == 'end' + within:
-          within = None
-      elif within:
-        if m.token_type == TOKEN_TEXT:
-          result.append(TemplateComponentBlock(m.contents.strip(), within, origin=origin, **prop))
-        elif m.token_type == TOKEN_VAR:
-          assert False, "Variable replacement in client side magic not yet supported"
+                if tag in cls.BLOCKTAGS:
+                    within = tag
+                elif tag == 'end' + within:
+                    within = None
+            elif within:
+                if m.token_type == TOKEN_TEXT:
+                    result.append(TemplateComponentBlock(m.contents.strip(), within, origin=origin, **prop))
+                elif m.token_type == TOKEN_VAR:
+                    assert False, "Variable replacement in client side magic not yet supported"
 
-    return result
+        return result
 
 def all():
-  pile = TemplateComponentBucket()
-  for template in all_templates():
-    for block in TemplateComponentBlock.from_template(template):
-      pile.append(block)
+    pile = TemplateComponentBucket()
+    for template in all_templates():
+        for block in TemplateComponentBlock.from_template(template):
+            pile.append(block)
 
-  return pile
+    return pile
 
 
 EXCLUDE_PATHS = '.svn', '.*.swp$', '*.~$', '.git'
 def all_templates():
-  all = []
+    all = []
 
-  if 'django.template.loaders.filesystem.load_template_source' in settings.TEMPLATE_LOADERS:
-    for templatedir in settings.TEMPLATE_DIRS:
-      for dirname, subdirs, regular in os.walk(templatedir):
-        for filename in regular:
-          if filename.find(".svn") != -1:
-            continue
-          name = (dirname + "/" + filename)[len(templatedir)+1:]
-          all.append(name)
-  if 'django.template.loaders.app_directories.load_template_source' in settings.TEMPLATE_LOADERS:
-    pass # FIXME: implement
+    if 'django.template.loaders.filesystem.load_template_source' in settings.TEMPLATE_LOADERS:
+        for templatedir in settings.TEMPLATE_DIRS:
+            for dirname, subdirs, regular in os.walk(templatedir):
+                for filename in regular:
+                    if filename.find(".svn") != -1:
+                        continue
+                    name = (dirname + "/" + filename)[len(templatedir)+1:]
+                    all.append(name)
+    if 'django.template.loaders.app_directories.load_template_source' in settings.TEMPLATE_LOADERS:
+        pass # FIXME: implement
 
-  all.reverse()
-  return all
-
+    all.reverse()
+    return all

@@ -5,9 +5,9 @@ from django.http import HttpResponse, Http404
 
 def generate_clientsidemagic_view(tag, content_type):
   def view(request, group='empty'):
-    collected = templatecomponents.all().without_inline().filter(tag).group(group)
+    collected = str(templatecomponents.all().without_inline().filter(tag).group(group))
 
-    if tag == 'js'
+    if tag == 'javascript':
       collected = templatecomponents.compress_js(collected)
     elif tag == 'css':
       collected = templatecomponents.compress_css(collected)

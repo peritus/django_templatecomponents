@@ -11,22 +11,22 @@ foo.
 /* extracted javascript with priority 1 */
 foo.
 >>> TemplateComponentBlock.from_string("{% javascript eggs 1 %} foo. {% endjavascript %}")[0]
-/* extracted javascript with priority 1 within groups eggs */
+/* extracted javascript with priority 1 with groups eggs */
 foo.
 >>> TemplateComponentBlock.from_string("{% javascript 1 eggs %} foo. {% endjavascript %}")[0]
-/* extracted javascript with priority 1 within groups eggs */
+/* extracted javascript with priority 1 with groups eggs */
 foo.
 >>> TemplateComponentBlock.from_string("{% javascript bar %} foo. {% endjavascript %}")[0]
-/* extracted javascript within groups bar */
+/* extracted javascript with groups bar */
 foo.
 >>> TemplateComponentBlock.from_string("""
 ... {% javascript bar %} foo. {% endjavascript %}
 ... bar
 ... {% javascript bar %} foo. {% endjavascript %}
 ... """)
-/* extracted javascript within groups bar */
+/* extracted javascript with groups bar */
 foo.
-/* extracted javascript within groups bar */
+/* extracted javascript with groups bar */
 foo.
 >>> #
 >>> #
@@ -41,16 +41,16 @@ foo.
 ... """
 >>> #simple filter:
 >>> TemplateComponentBlock.from_string(complexexample).filter('css')
-/* extracted css within groups print */
+/* extracted css with groups print */
 var x = 1;
 >>> #filter + priority
 >>> TemplateComponentBlock.from_string(complexexample).filter('javascript')
-/* extracted javascript with priority 10 within groups bar */
+/* extracted javascript with priority 10 with groups bar */
 var x = 1;
-/* extracted javascript within groups baz */
+/* extracted javascript with groups baz */
 x += 1;
 >>> TemplateComponentBlock.from_string(complexexample).filter('javascript').group('baz')
-/* extracted javascript within groups baz */
+/* extracted javascript with groups baz */
 x += 1;
 '''
 

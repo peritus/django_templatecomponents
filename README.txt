@@ -159,8 +159,8 @@ Here is a sample configuration file for **production**:
 Here is a sample configuration file for **development**:
 ::
 
-  TEMPLATECOMPONENTS_PATH_TO_YUICOMPRESSOR_JAR = os.path.realpath("..") + \
-    '/django/brokerz/yuicompressor-2.3.5/build/yuicompressor-2.3.5.jar'
+  TEMPLATECOMPONENTS_PATH_TO_YUICOMPRESSOR_JAR = os.path.realpath(".") + \
+    '/yuicompressor-2.3.5/build/yuicompressor-2.3.5.jar'
 
   TEMPLATECOMPONENTS_COMPRESS_JAVASCRIPT = False
 

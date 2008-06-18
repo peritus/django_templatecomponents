@@ -27,22 +27,22 @@ used on:
       content: " [" attr(href) "] ";
     }
   {% endcss %}
-  
+
   {% css screen print %}
     #clickme { font-weight: bold; }
   {% endcss %}
-  
+
   {% javascript screen %}
     document.getElementById('clickme').onclick = function(
       alert("Ugh! I've been clicked");
     );
   {% endjavascript %}
-  
+
   <a id='clickme' href="/click/">Click me</a>
 
 Serve your components from one file
 -----------------------------------
-(see also `rule #1 <http://stevesouders.com/hpws/rule-min-http.php>`_) 
+(see also `rule #1 <http://stevesouders.com/hpws/rule-min-http.php>`_)
 Using the above example, all your javascript blocks from all your templates
 would be available concatenated via `{{ MEDIA_URL }}screen.js` (e.g.
 `http://www.example.com/static/screen.js`).
@@ -136,14 +136,15 @@ one from template1.html.
 It is recommended to give a high priority for javascript librarys, a lower for
 custom built library code and a very low priority for custom code snippets.
 
-Installation 
+Installation
 ============
 
 * Clone the git repository or download the tarball (links on top of this page),
 * Put the folder ``django_templatecomponents`` somewhere in your ``$PYTHONPATH`` (presumably your project folder, where your ``manage.py`` lives).
+* Put "django_templatecomponents" to your INSTALLED_APPS setting.
 * Configure (see next section) and begin adapting your templates.
 
-Configuration 
+Configuration
 =============
 
 Here is a sample configuration file for **production**:
@@ -171,9 +172,10 @@ http://www.djangoproject.com/documentation/static_files/#how-to-do-it)
 
 ::
 
-  from django.conf import settings
-  if settings.DEBUG:
-      urlpatterns += patterns('', ('', include('django_templatecomponents.urls')))
+  # FIXME #
+  #from django.conf import settings
+  #if settings.DEBUG:
+  #    urlpatterns += patterns('', ('', include('django_templatecomponents.urls')))
 
 What next ?
 =================

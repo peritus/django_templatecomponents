@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import os
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from django_templatecomponents import templatecomponents
@@ -12,7 +12,7 @@ class Command(BaseCommand):
                 filename = filename[:-10] + 'js'
 
             print "Generating", filename
-       
-            handle = open(settings.MEDIA_ROOT + filename, 'w')
+
+            handle = open(os.path.join(settings.MEDIA_ROOT, filename), 'w')
             handle.write(templatecomponents.all().filter(type).group(group).compress())
             handle.close()

@@ -5,11 +5,11 @@ django_templatecomponents
 :Author: `Filip Noetzel <http://filip.noetzel.co.uk/>`_
 :Version: v0.01
 :Web: http://j03.de/projects/django_templatecomponents/
-:Source: http://j03.de/projects/django_templatecomponents/git/
-:Download: http://j03.de/projects/django_templatecomponents/download/
+:Source: http://j03.de/projects/django_templatecomponents/git/ (also `on github <http://github.com/peritus/django_templatecomponents/>`_)
+:Download: http://j03.de/projects/django_templatecomponents/releases/
 
 A `django <http://djangoproject.com/>`_ application that makes it easy to
-organize your component source (javascript, css) right in your django templates
+organize your component source (JavaScript, CSS) right in your django templates
 to make your website much faster.
 
 Benefits
@@ -18,7 +18,7 @@ Benefits
 Keeps you organized
 -------------------
 
-Define your javascript and css source right beneath the HTML skeleton that it's
+Define your JavaScript and CSS source right beneath the HTML skeleton that it's
 used on:
 ::
 
@@ -33,9 +33,9 @@ used on:
   {% endcss %}
   
   {% javascript screen %}
-    document.getElementById('clickme').onclick = function(
-      alert("Ugh! I've been clicked");
-    );
+    document.getElementById('clickme').onclick = function() {
+      alert('Ugh! I have been clicked');
+    }
   {% endjavascript %}
   
   <a id='clickme' href="/click/">Click me</a>
@@ -43,23 +43,23 @@ used on:
 Serve your components from one file
 -----------------------------------
 (see also `rule #1 <http://stevesouders.com/hpws/rule-min-http.php>`_) 
-Using the above example, all your javascript blocks from all your templates
-would be available concatenated via `{{ MEDIA_URL }}screen.js` (e.g.
-`http://www.example.com/static/screen.js`).
+Using the above example, all your ``javascript`` blocks from all your templates
+would be available concatenated via ``{{ MEDIA_URL }}screen.js`` (e.g.
+``http://www.example.com/static/screen.js``).
 
 You can arrange your template component blocks in (multiple) groups, to access
-them by different urls (Here, print css rules will be available as `print.js`).
+them by different urls (Here, ``print.js`` will contain the concatenated
+content of the first two blocks).
 
 One can imagine groups for
 
-* printing css
-* screen css
-* presentation css
-* additional css and javascript for logged in users
-* css for browers with enabled or disabled javascript
-* css and javascript for mobile devices
-* css and javascript for legacy browsers
-
+* printing CSS
+* screen CSS
+* presentation CSS
+* additional CSS and JavaScript for authenticated / paying in users
+* CSS for browers with enabled or disabled JavaScript
+* CSS and JavaScript for mobile devices
+* CSS and JavaScript for legacy browsers
 
 Static file generation
 ----------------------
@@ -70,8 +70,9 @@ each deployment:
 ::
 
   $ ./manage.py generate_templatecomponents
+  Generating print.css
+  Generating screen.css
   Generating screen.js
-  Generating javascript.js
 
 Minification
 ------------
@@ -89,7 +90,7 @@ debugging with tools such as `Firebug
 even debug your favourite ajax library using the non-minified version.
 
 You can enable minification during development to test if your component code
-plays well with minification.
+plays well with minification (see `Configuration` below.).
 
 Inline minification
 -------------------
@@ -131,9 +132,15 @@ Each block can have a priority, the following example illustrates this:
   {% javascript screen 10 %} var x = 1; {% endjavascript %}
 
 This would ensure, the JavaScript Block from template2.html appears above the
-one from template1.html.
+one from template1.html:
+::
 
-It is recommended to give a high priority for javascript librarys, a lower for
+  /* from 'template2.html' with priority 10 with groups screen */
+  var x = 1;
+  /* from 'template1.html' with priority 5 with groups screen */
+  x = x + 1;
+
+It is recommended to give a high priority for JavaScript libraries, a lower for
 custom built library code and a very low priority for custom code snippets.
 
 Installation 

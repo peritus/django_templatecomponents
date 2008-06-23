@@ -14,7 +14,7 @@ from sha import sha
 import os
 import re
 
-__VERSION__ = 0, 0, 1
+__VERSION__ = 0, 0, 2
 
 _COMPRESS_JAVASCRIPT = getattr(settings, 'TEMPLATECOMPONENTS_COMPRESS_JAVASCRIPT', not settings.DEBUG)
 _COMPRESS_CSS = getattr(settings, 'TEMPLATECOMPONENTS_COMPRESS_CSS', not settings.DEBUG)

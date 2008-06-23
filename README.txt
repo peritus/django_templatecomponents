@@ -3,7 +3,7 @@ django_templatecomponents
 =========================
 
 :Author: `Filip Noetzel <http://filip.noetzel.co.uk/>`_
-:Version: v0.01
+:Version: v0.02
 :Web: http://j03.de/projects/django_templatecomponents/
 :Source: http://j03.de/projects/django_templatecomponents/git/ (also `on github <http://github.com/peritus/django_templatecomponents/>`_)
 :Download: http://j03.de/projects/django_templatecomponents/releases/

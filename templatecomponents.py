@@ -113,9 +113,9 @@ class TemplateComponentBlock:
 
     BLOCKTAGS = 'css', 'javascript'
 
-    def __init__(self, text, blocktag, groups=[], priority=0, origin=''):
-        self.text = text
-        self.blocktag = blocktag
+    def __init__(self, text, type, groups=[], priority=0, origin=''):
+        self.text = text.strip()
+        self.blocktag = type
         self.priority = priority
         self.origin = origin
 
@@ -148,6 +148,8 @@ class TemplateComponentBlock:
 
     @classmethod
     def _parse_parameters(_, parameters):
+        type = parameters[0]
+        parameters = parameters[1:]
         priority = 0
         groups = []
         for p in parameters:
@@ -159,6 +161,7 @@ class TemplateComponentBlock:
         return {
           'priority': priority,
           'groups': groups,
+          'type': type,
         }
 
     @classmethod
@@ -184,20 +187,20 @@ class TemplateComponentBlock:
         for m in l.tokenize():
             if m.token_type == TOKEN_BLOCK:
 
-                tag = m.split_contents()[0]
+                type = m.split_contents()[0]
 
-                if tag not in cls.BLOCKTAGS + tuple(('end' + t) for t in cls.BLOCKTAGS):
+                if type not in cls.BLOCKTAGS + tuple(('end' + t) for t in cls.BLOCKTAGS):
                     continue; # shortcicuit here
 
-                prop = cls._parse_parameters(m.split_contents()[1:])
+                prop = cls._parse_parameters(m.split_contents())
 
-                if tag in cls.BLOCKTAGS:
-                    within = tag
-                elif tag == 'end' + within:
+                if type in cls.BLOCKTAGS:
+                    within = type
+                elif type == 'end' + within:
                     within = None
             elif within:
                 if m.token_type == TOKEN_TEXT:
-                    result.append(TemplateComponentBlock(m.contents.strip(), within, origin=origin, **prop))
+                    result.append(TemplateComponentBlock(m.contents, origin=origin, **prop))
                 elif m.token_type == TOKEN_VAR:
                     assert False, "Variable replacement in client side magic not yet supported"
 
@@ -208,6 +211,14 @@ def all():
     for template in all_templates():
         for block in TemplateComponentBlock.from_template(template):
             pile.append(block)
+
+    additional = getattr(settings, 'TEMPLATECOMPONENTS_ADDITIONAL', {})
+
+    for path, parameters in additional.items():
+        if not os.path.exists(path):
+            raise ImproperlyConfigured, "%s was not found, but specified in settings.TEMPLATECOMPONENTS_ADDITIONAL"
+        block = TemplateComponentBlock(open(path).read(), origin=path, **TemplateComponentBlock._parse_parameters(parameters.split(" ")))
+        pile.append(block)
 
     return pile
 

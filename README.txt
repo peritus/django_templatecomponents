@@ -143,6 +143,23 @@ one from template1.html:
 It is recommended to give a high priority for JavaScript libraries, a lower for
 custom built library code and a very low priority for custom code snippets.
 
+Including external libraries
+----------------------------
+
+You can easily include additional static files (like JavaScript libraries, CSS
+frameworks, ..), by specifying them in your ``settings.py``:
+::
+
+  TEMPLATECOMPONENTS_ADDITIONAL = {
+      os.path.join(MEDIA_ROOT, 'js/prototype.js'):     'javascript 10 script',
+      os.path.join(MEDIA_ROOT, 'js/scriptaculous.js'): 'javascript 9 script',
+      os.path.join(MEDIA_ROOT, 'js/effects.js'):       'javascript 8 script',
+      # .. 
+  }
+
+This way, you can avoid putting third party code in your ``templates/``
+directory and adding django template tags in the first and last line.
+
 Installation 
 ============
 
@@ -166,8 +183,8 @@ Here is a sample configuration file for **production**:
 Here is a sample configuration file for **development**:
 ::
 
-  TEMPLATECOMPONENTS_PATH_TO_YUICOMPRESSOR_JAR = os.path.realpath(".") + \
-    '/yuicompressor-2.3.5/build/yuicompressor-2.3.5.jar'
+  TEMPLATECOMPONENTS_PATH_TO_YUICOMPRESSOR_JAR = os.path.join(__file__,
+    '/yuicompressor-2.3.5/build/yuicompressor-2.3.5.jar')
 
   TEMPLATECOMPONENTS_COMPRESS_JAVASCRIPT = False
 

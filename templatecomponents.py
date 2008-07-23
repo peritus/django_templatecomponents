@@ -41,7 +41,7 @@ try:
 except AttributeError:
     if _COMPRESS_CSS:
         raise ImproperlyConfigured, (
-          'To use css compression, you need to specify a full path to yuicompressor.jar'
+          'To use css compression, you need to specify a full path to yuicompressor.jar '
           'using settings.TEMPLATECOMPONENTS_PATH_TO_YUICOMPRESSOR_JAR'
         )
 

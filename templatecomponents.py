@@ -216,7 +216,7 @@ def all():
 
     for path, parameters in additional.items():
         if not os.path.exists(path):
-            raise ImproperlyConfigured, "%s was not found, but specified in settings.TEMPLATECOMPONENTS_ADDITIONAL"
+            raise ImproperlyConfigured, "%s was not found, but specified in settings.TEMPLATECOMPONENTS_ADDITIONAL" % path
         block = TemplateComponentBlock(open(path).read(), origin=path, **TemplateComponentBlock._parse_parameters(parameters.split(" ")))
         pile.append(block)
 

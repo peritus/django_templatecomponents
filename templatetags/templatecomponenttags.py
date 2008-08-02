@@ -8,7 +8,6 @@ from django_templatecomponents import templatecomponents
 register = Library()
 
 def clientsidemagic(parser, token):
-    print "YAY!"
     tag, options = token.split_contents()[0], token.split_contents()[1:]
     inner = parser.parse(('end' + tag, "end" + token.contents))
     parser.delete_first_token()

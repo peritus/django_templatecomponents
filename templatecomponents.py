@@ -223,7 +223,7 @@ def all():
     return pile
 
 
-EXCLUDE_PATHS = '.svn', '.*.swp$', '*.~$', '.git'
+EXCLUDE_PATHS = '.*\.svn*', '.*\.*\.swp$', '.*.~$', '.*\.git*', '.*\.bak$', '.*\.backup$', '.*\.gitignore$'
 def all_templates():
     all = []
 
@@ -231,7 +231,7 @@ def all_templates():
         for templatedir in settings.TEMPLATE_DIRS:
             for dirname, subdirs, regular in os.walk(templatedir):
                 for filename in regular:
-                    if filename.find(".svn") != -1:
+                    if any([re.match(exclude, filename) for exclude in EXCLUDE_PATHS]):
                         continue
                     name = (dirname + "/" + filename)[len(templatedir)+1:]
                     all.append(name)

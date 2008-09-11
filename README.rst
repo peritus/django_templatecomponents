@@ -3,7 +3,7 @@ django_templatecomponents
 =========================
 
 :Author: `Filip Noetzel <http://filip.noetzel.co.uk/>`_
-:Version: v0.02
+:Version: v0.03
 :Web: http://j03.de/projects/django_templatecomponents/
 :Source: http://j03.de/projects/django_templatecomponents/git/ (also `on github <http://github.com/peritus/django_templatecomponents/>`_)
 :Download: http://j03.de/projects/django_templatecomponents/releases/
@@ -74,44 +74,6 @@ each deployment:
   Generating screen.css
   Generating screen.js
 
-Minification
-------------
-
-(See also `rule #10 <http://stevesouders.com/hpws/rule-minify.php>`_)
-django_templatecomponents allows you to `minify
-<http://en.wikipedia.org/wiki/Minify>`_ your components both on the fly and
-during static file generation. Currently `JSMin
-<http://www.crockford.com/javascript/jsmin.html>`_ and `YUICompressor
-<http://developer.yahoo.com/yui/compressor/>`_ are supported.
-
-During development it is recommended to disable minification at all, as
-debugging with tools such as `Firebug
-<http://www.joehewitt.com/software/firebug/>`_ is a lot easier. So, you can
-even debug your favourite ajax library using the non-minified version.
-
-You can enable minification during development to test if your component code
-plays well with minification (see `Configuration` below.).
-
-Inline minification
--------------------
-
-If you absolutly need to use inline components, you can minify these as well:
-::
-
-  {% javascript inline %}
-    var getRandomNumber = function() {
-      return 4; // chosen by fair dice roll.
-                // guaranteed to be random.
-    };
-  {% endjavascript %}
-
-would become
-::
-
-  <script type='text/javascript'>var getRandomNumber=function(){return 4};</script>
-
-Within inline blocks, all of django's template syntax and context is supported.
-
 Priority based block dependency
 -------------------------------
 
@@ -167,37 +129,12 @@ Installation
 * Put the folder ``django_templatecomponents`` somewhere in your ``$PYTHONPATH`` (presumably your project folder, where your ``manage.py`` lives).
 * Configure (see next section) and begin adapting your templates.
 
-Configuration 
-=============
-
-Here is a sample configuration file for **production**:
-::
-
-  TEMPLATECOMPONENTS_PATH_TO_YUICOMPRESSOR_JAR = \
-    '/opt/yuicompressor/build/yuicompressor-2.3.5.jar'
-
-  TEMPLATECOMPONENTS_COMPRESS_JAVASCRIPT = True
-
-  TEMPLATECOMPONENTS_COMPRESS_CSS = True
-
-Here is a sample configuration file for **development**:
-::
-
-  TEMPLATECOMPONENTS_PATH_TO_YUICOMPRESSOR_JAR = os.path.join(__file__,
-    '/yuicompressor-2.3.5/build/yuicompressor-2.3.5.jar')
-
-  TEMPLATECOMPONENTS_COMPRESS_JAVASCRIPT = False
-
-  TEMPLATECOMPONENTS_COMPRESS_CSS = False
-
-For development, you also want to add this to your urls.py (but *before*
-http://www.djangoproject.com/documentation/static_files/#how-to-do-it)
-
-::
-
-  from django.conf import settings
-  if settings.DEBUG:
-      urlpatterns += patterns('', ('', include('django_templatecomponents.urls')))
+For development, you want to add the
+``'django_templatecomponents.middleware.TemplateComponentsServeMiddleware',``
+to your ``MIDDLEWARE_CLASSES`` If `django.views.static.serve
+<http://docs.djangoproject.com/en/dev/howto/static-files/#howto-static-files>`_
+is invoked and no static file is present the middleware serves the
+templatecomponent.
 
 What next ?
 =================

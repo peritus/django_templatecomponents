@@ -7,49 +7,13 @@ from django.template import Lexer, TOKEN_TEXT, TOKEN_BLOCK, TOKEN_VAR
 from django.template.loader import render_to_string
 from django.template.loaders.filesystem import load_template_source
 from django.utils.encoding import smart_unicode
-from jsmin import jsmin
 from os.path import exists, getmtime
 from popen2 import popen2
 from sha import sha
 import os
 import re
 
-__VERSION__ = 0, 0, 2
-
-_COMPRESS_JAVASCRIPT = getattr(settings, 'TEMPLATECOMPONENTS_COMPRESS_JAVASCRIPT', not settings.DEBUG)
-_COMPRESS_CSS = getattr(settings, 'TEMPLATECOMPONENTS_COMPRESS_CSS', not settings.DEBUG)
-
-compress_js = jsmin
-
-try:
-    _YUICOMPRESSOR_JAR = settings.TEMPLATECOMPONENTS_PATH_TO_YUICOMPRESSOR_JAR
-    if not exists(_YUICOMPRESSOR_JAR):
-        raise ImproperlyConfigured, _YUICOMPRESSOR_JAR + " not found."
-
-    _YUICOMPRESSOR_OPTIONS = getattr(settings, 'TEMPLATECOMPONENTS_OPTIONS', '')
-
-    def _compress_yui(string, type):
-        cmdline = "java -jar %s --type %s %s" % (_YUICOMPRESSOR_JAR, type, _YUICOMPRESSOR_OPTIONS)
-        readstream, writestream = popen2(cmdline)
-        writestream.write(string)
-        writestream.close()
-        return readstream.read()
-
-    compress_js = lambda s: _compress_yui(s, 'js')
-    compress_css = lambda s: _compress_yui(s, 'css')
-
-except AttributeError:
-    if _COMPRESS_CSS:
-        raise ImproperlyConfigured, (
-          'To use css compression, you need to specify a full path to yuicompressor.jar '
-          'using settings.TEMPLATECOMPONENTS_PATH_TO_YUICOMPRESSOR_JAR'
-        )
-
-if not _COMPRESS_CSS:
-    compress_css = lambda s: s
-
-if not _COMPRESS_JAVASCRIPT:
-    compress_js = lambda s: s
+__VERSION__ = 0, 0, 3
 
 _hash = lambda s: sha(s.encode("utf-8")).digest()
 
@@ -67,7 +31,10 @@ class TemplateComponentBucket(list):
         sofar = set()
         for block in self.without_inline():
             for group in block.groups:
-                sofar.add((group, block.blocktag))
+                extension = block.blocktag
+                if extension == 'javascript':
+                    extension = 'js'
+                sofar.add((group, extension))
 
         return list(sofar)
 
@@ -76,10 +43,18 @@ class TemplateComponentBucket(list):
           block for block in self if 'inline' not in block.groups
         )
 
-    def filter(self, type):
-        assert type in TemplateComponentBlock.BLOCKTAGS
+    def filter(self, filter_for):
+        assert filter_for in TemplateComponentBlock.BLOCKTAGS
+
+
+        if filter_for == 'js':
+            # backwards compatibility
+            filter_for = 'js', 'javascript'
+        else:
+            filter_for = (filter_for, )
+
         return TemplateComponentBucket(
-          block for block in self if block.blocktag == type
+          block for block in self if block.blocktag in filter_for
         )
 
     def group(self, group):
@@ -92,26 +67,9 @@ class TemplateComponentBucket(list):
           block for block in self if group in block.groups
         )
 
-    def compress(self):
-        if len(self) == 0:
-            return ''
-
-        type = self[0].blocktag
-
-        for b in self:
-            assert b.blocktag == type, 'Must be of same type!'
-
-        if type == 'javascript':
-            return compress_js(str(self))
-        elif type == 'css':
-            return compress_css(str(self))
-
-        assert False, 'never reach this'
-
-
 class TemplateComponentBlock:
 
-    BLOCKTAGS = 'css', 'javascript'
+    BLOCKTAGS = 'css', 'js', 'javascript'
 
     def __init__(self, text, type, groups=[], priority=0, origin=''):
         self.text = text.strip()

@@ -7,12 +7,10 @@ from django_templatecomponents import templatecomponents
 class Command(BaseCommand):
     def handle(self, **options):
         for group, type in templatecomponents.all().available():
-            filename = '%s.%s' % (group, type)
-            if type == 'javascript':
-                filename = filename[:-10] + 'js'
 
+            filename = '%s.%s' % (group, type)
             print "Generating", filename
 
             handle = open(os.path.join(settings.MEDIA_ROOT, filename), 'w')
-            handle.write(templatecomponents.all().filter(type).group(group).compress())
+            handle.write(templatecomponents.all().filter(type).group(group))
             handle.close()

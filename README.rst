@@ -56,10 +56,11 @@ One can imagine groups for
 * printing CSS
 * screen CSS
 * presentation CSS
-* additional CSS and JavaScript for authenticated / paying in users
+* additional CSS and JavaScript for authenticated / paying users
 * CSS for browers with enabled or disabled JavaScript
 * CSS and JavaScript for mobile devices
 * CSS and JavaScript for legacy browsers
+* Splitting JavaScript in `25K-Slices for the iPhone <http://yuiblog.com/blog/2008/02/06/iphone-cacheability/>`_
 
 Static file generation
 ----------------------

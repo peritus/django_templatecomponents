@@ -6,11 +6,11 @@ from django_templatecomponents import templatecomponents
 
 class Command(BaseCommand):
     def handle(self, **options):
-        for group, type in templatecomponents.all().available():
+        for group, extension in templatecomponents.all().available():
 
-            filename = '%s.%s' % (group, type)
+            filename = '%s.%s' % (group, extension)
             print "Generating", filename
 
             handle = open(os.path.join(settings.MEDIA_ROOT, filename), 'w')
-            handle.write(templatecomponents.all().filter(type).group(group))
+            handle.write(templatecomponents.all().filter(extension).group(group))
             handle.close()

@@ -77,9 +77,9 @@ class TemplateComponentBlock:
     BLOCKTAGS = 'css', 'js', 'javascript'
     ENDBLOCKTAGS = tuple(('end%s' % t) for t in BLOCKTAGS)
 
-    def __init__(self, text, type, groups=[], priority=0, origin=''):
+    def __init__(self, text, blocktag, groups=[], priority=0, origin=''):
         self.text = text.strip()
-        self.blocktag = type
+        self.blocktag = blocktag
         self.priority = priority
         self.origin = origin
 
@@ -112,7 +112,7 @@ class TemplateComponentBlock:
 
     @classmethod
     def _parse_parameters(_, parameters):
-        type = parameters[0]
+        blocktag = parameters[0]
         parameters = parameters[1:]
         priority = 0
         groups = []
@@ -125,7 +125,7 @@ class TemplateComponentBlock:
         return {
           'priority': priority,
           'groups': groups,
-          'type': type,
+          'blocktag': blocktag,
         }
 
     @classmethod
@@ -159,7 +159,7 @@ class TemplateComponentBlock:
                 within = attributes[0]
                 node_bucket = NodeList()
             elif attributes[0] in cls.ENDBLOCKTAGS:
-                prop['type'] = within
+                prop['blocktag'] = within
                 within = None
                 rendered_inner = Parser(node_bucket).parse().render(TEMPLATECOMPONENTS_CONTEXT)
                 result.append(TemplateComponentBlock(rendered_inner, origin=origin, **prop))

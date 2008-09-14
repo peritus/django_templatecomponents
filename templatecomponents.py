@@ -3,7 +3,8 @@
 from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import ImproperlyConfigured
-from django.template import Lexer, TOKEN_TEXT, TOKEN_BLOCK, TOKEN_VAR
+from django.template import Lexer, Parser, NodeList, TOKEN_TEXT, TOKEN_BLOCK, TOKEN_VAR
+from django.template.context import Context
 from django.template.loader import render_to_string
 from django.template.loaders.filesystem import load_template_source
 from django.utils.encoding import smart_unicode
@@ -18,6 +19,10 @@ __VERSION__ = 0, 0, 3
 _hash = lambda s: sha(s.encode("utf-8")).digest()
 
 BLOCKS = {}
+
+TEMPLATECOMPONENTS_CONTEXT = Context(dict_={
+    'settings': settings,
+})
 
 class TemplateComponentBucket(list):
     def __repr__(self):
@@ -70,6 +75,7 @@ class TemplateComponentBucket(list):
 class TemplateComponentBlock:
 
     BLOCKTAGS = 'css', 'js', 'javascript'
+    ENDBLOCKTAGS = tuple(('end%s' % t) for t in BLOCKTAGS)
 
     def __init__(self, text, type, groups=[], priority=0, origin=''):
         self.text = text.strip()
@@ -140,27 +146,25 @@ class TemplateComponentBlock:
     def from_string(cls, template_soup, origin=''):
         result = TemplateComponentBucket()
 
-        l = Lexer(template_soup, origin)
         within = None
-        for m in l.tokenize():
-            if m.token_type == TOKEN_BLOCK:
+        node_bucket = NodeList()
 
-                type = m.split_contents()[0]
+        for m in Lexer(template_soup, origin).tokenize():
+            attributes = m.split_contents()
+            if not attributes:
+                continue
 
-                if type not in cls.BLOCKTAGS + tuple(('end' + t) for t in cls.BLOCKTAGS):
-                    continue; # shortcicuit here
-
-                prop = cls._parse_parameters(m.split_contents())
-
-                if type in cls.BLOCKTAGS:
-                    within = type
-                elif type == 'end' + within:
-                    within = None
+            if attributes[0] in cls.BLOCKTAGS:
+                prop = cls._parse_parameters(attributes)
+                within = attributes[0]
+                node_bucket = NodeList()
+            elif attributes[0] in cls.ENDBLOCKTAGS:
+                prop['type'] = within
+                within = None
+                rendered_inner = Parser(node_bucket).parse().render(TEMPLATECOMPONENTS_CONTEXT)
+                result.append(TemplateComponentBlock(rendered_inner, origin=origin, **prop))
             elif within:
-                if m.token_type == TOKEN_TEXT:
-                    result.append(TemplateComponentBlock(m.contents, origin=origin, **prop))
-                elif m.token_type == TOKEN_VAR:
-                    assert False, "Variable replacement in client side magic not yet supported"
+                node_bucket.append(m)
 
         return result
 

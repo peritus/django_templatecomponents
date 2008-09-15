@@ -2,15 +2,13 @@
 import os
 from django.core.management.base import BaseCommand
 from django.conf import settings
-from django_templatecomponents import templatecomponents
+from django_templatecomponents import templatecomponents, views
 
 class Command(BaseCommand):
     def handle(self, **options):
         for group, extension in templatecomponents.all().available():
-
             filename = '%s.%s' % (group, extension)
-            print "Generating", filename
-
+            print "Generating %s" % filename
             handle = open(os.path.join(settings.MEDIA_ROOT, filename), 'w')
-            handle.write(templatecomponents.all().filter(extension).group(group))
+            handle.write(views.generate_templatecomponents(None, filename).content)
             handle.close()

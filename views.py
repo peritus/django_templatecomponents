@@ -7,7 +7,7 @@ import templatecomponents
 def generate_templatecomponents(request, path):
     group, extension = path.rsplit(".", 1)
 
-    collected = str(templatecomponents.all().without_inline().filter(extension).group(group))
+    collected = unicode(templatecomponents.all().without_inline().filter(extension).group(group))
 
     if not collected:
         av = ", ".join(["%s.%s" % x for x in templatecomponents.all().available()])

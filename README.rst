@@ -96,6 +96,7 @@ Each block can have a priority, the following example illustrates this:
 
 This would ensure, the JavaScript Block from template2.html appears above the
 one from template1.html:
+
 ::
 
   /* from 'template2.html' with priority 10 with groups screen */
@@ -138,10 +139,10 @@ is invoked and no static file is present the middleware serves the
 templatecomponent.
 
 What next ?
-=================
+===========
 
 * Convert all your components to template components.
-* Read `Steve Souder's »High Performance Web Sites« <http://stevesouders.com/hpws/rules.php>`_
+* Read `Steve Souder's "High Performance Web Sites" <http://stevesouders.com/hpws/rules.php>`_
 
 License
 =======

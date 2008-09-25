@@ -94,7 +94,7 @@ Each block can have a priority, the following example illustrates this:
   # template2.html
   {% javascript screen 10 %} var x = 1; {% endjavascript %}
 
-This would ensure, the JavaScript Block from template2.html appears above the
+This would ensure, the javascript block from template2.html appears above the
 one from template1.html:
 
 ::
@@ -131,12 +131,17 @@ Installation
 * Put the folder ``django_templatecomponents`` somewhere in your ``$PYTHONPATH`` (presumably your project folder, where your ``manage.py`` lives).
 * Configure (see next section) and begin adapting your templates.
 
-For development, you want to add the
-``'django_templatecomponents.middleware.TemplateComponentsServeMiddleware',``
-to your ``MIDDLEWARE_CLASSES`` If `django.views.static.serve
-<http://docs.djangoproject.com/en/dev/howto/static-files/#howto-static-files>`_
-is invoked and no static file is present the middleware serves the
-templatecomponent.
+Adopt your development ``urls.py`` like this:
+
+::
+
+  if settings.DEBUG:
+      urlpatterns += patterns('',
+        (r'^media/(?P<path>.*.js)$', 'django_templatecomponents.views.generate_templatecomponents',),
+        (r'^media/(?P<path>.*.css)$', 'django_templatecomponents.views.generate_templatecomponents',),
+
+        (r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
+    )
 
 What next ?
 ===========

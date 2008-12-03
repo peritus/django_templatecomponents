@@ -143,6 +143,16 @@ Adopt your development ``urls.py`` like this:
         (r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
     )
 
+Syntax highlighting in vim
+--------------------------
+To get the syntax highlighting for the (now embedded) css and javascript in
+vim, create a file at ``~/.vim/after/syntax/htmldjango.vim`` with the following
+contents:
+::
+
+  syn region javaScript start=+{% js+ keepend end=+{% endjs %}+me=s-1 contains=@htmlJavaScript,htmlCssStyleComment,htmlScriptTag,@htmlPreproc
+  syn region cssStyle start=+{% css+ keepend end=+{% endcss %}+ contains=@htmlCss,htmlTag,htmlEndTag,htmlCssStyleComment,@htmlPreproc
+
 What next ?
 ===========
 

@@ -6,7 +6,6 @@ from django.core.exceptions import ImproperlyConfigured
 from django.template import Lexer, Parser, NodeList, TOKEN_TEXT, TOKEN_BLOCK, TOKEN_VAR
 from django.template.context import Context
 from django.template.loader import render_to_string
-from django.template.loaders.filesystem import load_template_source
 from django.utils.encoding import smart_unicode
 from os.path import exists, getmtime
 from popen2 import popen2
@@ -129,7 +128,7 @@ class TemplateComponentBlock:
         }
 
     @classmethod
-    def from_template(cls, templatepath):
+    def from_template(cls, templatepath, load_template_source):
         template_string, _ = load_template_source(templatepath)
 
         # Cache to speed things up.
@@ -170,8 +169,8 @@ class TemplateComponentBlock:
 
 def all():
     pile = TemplateComponentBucket()
-    for template in all_templates():
-        for block in TemplateComponentBlock.from_template(template):
+    for (template, loader) in all_templates():
+        for block in TemplateComponentBlock.from_template(template, loader):
             pile.append(block)
 
     additional = getattr(settings, 'TEMPLATECOMPONENTS_ADDITIONAL', {})
@@ -186,19 +185,34 @@ def all():
 
 
 EXCLUDE_PATHS = '.*\.svn*', '.*\.*\.swp$', '.*.~$', '.*\.git*', '.*\.bak$', '.*\.backup$', '.*\.gitignore$'
+
+def walk_template_dir(templatedir, load_template_source):
+    all = []
+    if os.path.isdir(templatedir):
+        for dirname, subdirs, regular in os.walk(templatedir):
+            for filename in regular:
+                if any([re.match(exclude, filename) for exclude in EXCLUDE_PATHS]):
+                    continue
+                name = (dirname + "/" + filename)[len(templatedir)+1:]
+                all.append((name, load_template_source))
+    return all
+
 def all_templates():
     all = []
 
     if 'django.template.loaders.filesystem.load_template_source' in settings.TEMPLATE_LOADERS:
+        from django.template.loaders.filesystem import load_template_source
         for templatedir in settings.TEMPLATE_DIRS:
-            for dirname, subdirs, regular in os.walk(templatedir):
-                for filename in regular:
-                    if any([re.match(exclude, filename) for exclude in EXCLUDE_PATHS]):
-                        continue
-                    name = (dirname + "/" + filename)[len(templatedir)+1:]
-                    all.append(name)
+            all += walk_template_dir(templatedir, load_template_source)
+
     if 'django.template.loaders.app_directories.load_template_source' in settings.TEMPLATE_LOADERS:
-        pass # FIXME: implement
+        from django.template.loaders.app_directories import load_template_source
+        for app in settings.INSTALLED_APPS:
+            try:
+                app_path = __import__(app, {}, {}, [app.split('.')[-1]]).__path__
+            except AttributeError:
+                continue
+            all += walk_template_dir(app_path[0] + '/templates', load_template_source)
 
     all.reverse()
     return all

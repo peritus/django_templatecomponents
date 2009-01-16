@@ -1,12 +1,14 @@
 =========================
-django_templatecomponents
+django-templatecomponents
 =========================
 
 :Author: `Filip Noetzel <http://filip.noetzel.co.uk/>`_
 :Version: v0.03
-:Web: http://j03.de/projects/django_templatecomponents/
-:Source: http://j03.de/projects/django_templatecomponents/git/ (also `on github <http://github.com/peritus/django_templatecomponents/>`_)
-:Download: http://j03.de/projects/django_templatecomponents/releases/
+:Web: http://j03.de/projects/django-templatecomponents/
+:Git: ``git clone http://j03.de/git/django-templatecomponents.git/``
+  ( `browse <http://j03.de/git/?p=django-templatecomponents.git>`_,
+  also `on github <http://github.com/peritus/django-templatecomponents/>`_)
+:Download: `django-templatecomponents.tar.gz <http://j03.de/git/?p=django-templatecomponents.git;a=snapshot;sf=tgz>`_
 
 A `django <http://djangoproject.com/>`_ application that makes it easy to
 organize your component source (JavaScript, CSS) right in your django templates
@@ -60,6 +62,7 @@ One can imagine groups for
 * CSS for browers with enabled or disabled JavaScript
 * CSS and JavaScript for mobile devices
 * CSS and JavaScript for legacy browsers
+* `Splitting the initial payload <http://www.stevesouders.com/blog/2008/05/14/split-the-initial-payload/>`_
 * Splitting JavaScript in `25K-Slices for the iPhone <http://yuiblog.com/blog/2008/02/06/iphone-cacheability/>`_
 
 Static file generation

@@ -216,3 +216,7 @@ def all_templates():
 
     all.reverse()
     return all
+
+from django.template import add_to_builtins
+
+add_to_builtins('templatecomponents.templatetags.templatecomponenttags')

@@ -222,11 +222,11 @@ Adopt your development ``urls.py`` like this:
 
   if settings.DEBUG:
       urlpatterns += patterns('',
-        (r'^media/(?P<path>.*.js)$', 'django_templatecomponents.views.generate_templatecomponents',),
-        (r'^media/(?P<path>.*.css)$', 'django_templatecomponents.views.generate_templatecomponents',),
+          (r'^media/(?P<path>.*.js)$', 'templatecomponents.views.generate_templatecomponents',),
+          (r'^media/(?P<path>.*.css)$', 'templatecomponents.views.generate_templatecomponents',),
 
-        (r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
-    )
+          (r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
+      )
 
 Misc
 ====

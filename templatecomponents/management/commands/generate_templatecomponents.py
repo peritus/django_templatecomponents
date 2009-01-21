@@ -2,7 +2,7 @@
 import os
 from django.core.management.base import BaseCommand
 from django.conf import settings
-from django_templatecomponents import templatecomponents, views
+from templatecomponents import templatecomponents, views
 
 class Command(BaseCommand):
     def handle(self, **options):

@@ -2,7 +2,7 @@
 
 from django.template import Library, Node
 from django.template.defaulttags import CommentNode
-from django_templatecomponents import templatecomponents
+import templatecomponents
 
 register = Library()
 

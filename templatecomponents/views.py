@@ -11,7 +11,7 @@ def generate(request, path):
 
     if not collected:
         av = ", ".join(["%s.%s" % x for x in templatecomponents.all().available()])
-        raise Http404("templatecomponent '%s.%s' not found. Available choices: %s" % (group, extension, av,))
+        raise Http404("templatecomponent '%s.%s' not found. Available choices: %s" % (group, extension, str(av),))
 
     return HttpResponse(collected, content_type=guess_type(path)[0])
 

@@ -8,45 +8,73 @@ django-templatecomponents
 :Git: ``git clone http://j03.de/git/django-templatecomponents.git/``
   ( `browse <http://j03.de/git/?p=django-templatecomponents.git>`_,
   also `on github <http://github.com/peritus/django_templatecomponents/>`_)
-:Download: `django-templatecomponents.tar.gz <http://j03.de/git/?p=django-templatecomponents.git;a=snapshot;sf=tgz>`_
+:Download: `django-templatecomponents.tar.gz <http://j03.de/git/?p=django-templatecomponents.git;a=snapshot;h=v0.03;sf=tgz;.tar.gz>`_
 
 A `django <http://djangoproject.com/>`_ application that makes it easy to
 organize your component source (JavaScript, CSS) in your django templates.
 
-Benefits
+Overview
 ========
-
-Keeps you organized
--------------------
 
 Define your JavaScript and CSS source right beneath the HTML skeleton that it's
 used on:
 
-.. sourcecode:: html+django
+``template.html``:
 
-  {% css print %}
-    a[href]:after{
-      content: " [" attr(href) "] ";
-    }
-  {% endcss %}
+  .. sourcecode:: html+django
   
-  {% css screen print %}
-    #clickme { font-weight: bold; }
-  {% endcss %}
+    {% css print %}
+      a[href]:after{
+        content: " [" attr(href) "] ";
+      }
+    {% endcss %}
+    
+    {% css screen print %}
+      #clickme { font-weight: bold; }
+    {% endcss %}
+    
+    {% js client %}
+      document.getElementById('clickme').onclick = function() {
+        alert('Ugh! I have been clicked');
+      }
+    {% endjs %}
+    
+    <a id='clickme' href="/click/">Click me</a>
+
+This would result in
+
+``print.css``:
+
+  .. sourcecode:: css
   
-  {% javascript screen %}
-    document.getElementById('clickme').onclick = function() {
-      alert('Ugh! I have been clicked');
-    }
-  {% endjavascript %}
-  
-  <a id='clickme' href="/click/">Click me</a>
+      /* extracted css from template '/path/to/template.html' with groups print */
+      a[href]:after{
+        content: " [" attr(href) "] ";
+      }
+      /* extracted css from template '/path/to/template.html' with groups print screen */
+      #clickme { font-weight: bold; }
+
+``screen.css``:
+
+  .. sourcecode:: css
+
+      /* extracted css from template '/path/to/template.html' with groups print screen */
+      #clickme { font-weight: bold; }
+
+``client.js``:
+
+  .. sourcecode:: javascript
+
+      /* extracted css from template '/path/to/template.html' with groups client */
+      document.getElementById('clickme').onclick = function() {
+        alert('Ugh! I have been clicked');
+      }
+
+Benefits
+========
 
 Serve your components from one file
 -----------------------------------
-Using the above example, all your ``javascript`` blocks from all your templates
-would be available concatenated via ``{{ MEDIA_URL }}screen.js`` (e.g.
-``http://www.example.com/static/screen.js``).
 
 (see also `rule #1 <http://stevesouders.com/hpws/rule-min-http.php>`_) 
 
@@ -94,25 +122,29 @@ Each block can have a priority, the following example illustrates this:
 
 ``template1.html``:
 
-.. sourcecode:: js+django
+  .. sourcecode:: js+django
 
-  {% javascript screen 5 %} x = x + 1; {% endjavascript %}
+    {% js xlib 5 %} x = x + 1; {% endjs %}
 
 ``template2.html``:
 
-.. sourcecode:: js+django
+  .. sourcecode:: js+django
 
-  {% javascript screen 10 %} var x = 1; {% endjavascript %}
+    {% js xlib 10 %} var x = 1; {% endjs %}
 
-This would ensure, the javascript block from template2.html appears above the
-one from template1.html:
+This would ensure, the javascript block from ``template2.html`` appears above the
+one from ``template1.html``:
 
-.. sourcecode:: javascript
+``xlib.js``:
 
-  /* from 'template2.html' with priority 10 with groups screen*/
-  var x = 1;
-  /* from 'template1.html' with priority 5 with groups screen*/
-  x = x + 1;
+  .. sourcecode:: javascript
+
+    /* extracted javascript from '/path/to/template2.html' with priority 10 with groups screen*/
+    var x = 1;
+
+    /* extracted javascript from '/path/to/template1.html' with priority 5 with groups screen*/
+    x = x + 1;
+
 
 It is recommended to give a high priority for JavaScript libraries, a lower for
 custom built library code and a very low priority for custom code snippets.
@@ -123,14 +155,14 @@ Including external libraries
 You can easily include additional static files (like JavaScript libraries, CSS
 frameworks, ..), by specifying them in your ``settings.py``:
 
-.. sourcecode:: python
-
-  TEMPLATECOMPONENTS_ADDITIONAL = {
-      os.path.join(MEDIA_ROOT, 'js/prototype.js'):     'javascript 10 script',
-      os.path.join(MEDIA_ROOT, 'js/scriptaculous.js'): 'javascript 9 script',
-      os.path.join(MEDIA_ROOT, 'js/effects.js'):       'javascript 8 script',
-      # .. 
-  }
+  .. sourcecode:: python
+  
+    TEMPLATECOMPONENTS_ADDITIONAL = {
+        os.path.join(MEDIA_ROOT, 'js/prototype.js'):     'js 10 script',
+        os.path.join(MEDIA_ROOT, 'js/scriptaculous.js'): 'js 9 script',
+        os.path.join(MEDIA_ROOT, 'js/effects.js'):       'js 8 script',
+        # .. 
+    }
 
 This way, you can avoid putting third party code in your ``templates/``
 directory and adding django template tags in the first and last line.
@@ -159,36 +191,38 @@ Examples
 Settings-dependent inclusions
 +++++++++++++++++++++++++++++
 
-.. sourcecode:: js+django
-
-  {% js script %}
-    var pageTracker = _gat._getTracker("{{ settings.GOOGLE_ANALYTICS_KEY }}");
-    pageTracker._trackPageview();
-  {% js %}
+  .. sourcecode:: js+django
+  
+    {% js script %}
+      var pageTracker = _gat._getTracker("{{ settings.GOOGLE_ANALYTICS_KEY }}");
+      pageTracker._trackPageview();
+    {% js %}
 
 Debug-build
 +++++++++++
 
-.. sourcecode:: js+django
-
-  {% js script %}
-  function complex() {
-    {% if settings.debug %}console.log("Complex function invoked");{% endif%}
-    var x = 5;
-    // very complex code..
-  }
-  {% js %}
+  .. sourcecode:: js+django
+  
+    {% js script %}
+      var complex = function() {
+        {% if settings.debug %}
+          console.log("Complex function invoked");
+        {% endif%}
+        var x = 5;
+        // very complex code..
+      }
+    {% js %}
 
 CSS Variables
 +++++++++++++
 
-.. sourcecode:: css+django
-
-  {% css style %}
-    body {
-      background-color: {{ settings.colors.background }};
-    }
-  {% endcss %}
+  .. sourcecode:: css+django
+  
+    {% css style %}
+      body {
+        background-color: {{ settings.colors.background }};
+      }
+    {% endcss %}
 
 Installation 
 ============
@@ -198,17 +232,17 @@ Download
 
 Using git:
 
-.. sourcecode:: bash
-
-  git clone http://j03.de/git/django-templatecomponents.git/
+  .. sourcecode:: bash
+  
+    git clone http://j03.de/git/django-templatecomponents.git/
 
 Using tarball:
 
-.. sourcecode:: bash
-
-  curl 'http://j03.de/git/?p=django-templatecomponents.git;a=snapshot;sf=tgz' > django-hashedmedia.tar.gz
-  tar -xvzf django-templatecomponents.tar.gz
-  rm django-templatecomponents.tar.gz
+  .. sourcecode:: bash
+  
+    curl 'http://j03.de/git/?p=django-templatecomponents.git;a=snapshot;sf=tgz' > django-hashedmedia.tar.gz
+    tar -xvzf django-templatecomponents.tar.gz
+    rm django-templatecomponents.tar.gz
 
 Put the folder ``django-templatecomponents`` somewhere in your ``$PYTHONPATH``
 (presumably your project folder, where your ``manage.py`` lives).
@@ -218,15 +252,19 @@ Configuration
 
 Adopt your development ``urls.py`` like this:
 
-.. sourcecode:: python
+  .. sourcecode:: python
+  
+    if settings.DEBUG:
+        urlpatterns += patterns('',
+            (r'^static/(?P<path>.*\.(js|css))$', 'templatecomponents.views.generate'),
 
-  if settings.DEBUG:
-      urlpatterns += patterns('',
-          (r'^media/(?P<path>.*.js)$', 'templatecomponents.views.generate',),
-          (r'^media/(?P<path>.*.css)$', 'templatecomponents.views.generate',),
+	    # make sure to have the above rule before your
+	    # django.views.static.serve rule
 
-          (r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
-      )
+            (r'^static/(?P<path>.*)$', 'django.views.static.serve', {
+              'document_root': settings.MEDIA_ROOT
+            }),
+        )
 
 Misc
 ====
@@ -247,7 +285,7 @@ What next ?
 
 * Convert all your components to template components.
 * Read `Steve Souder's "High Performance Web Sites" <http://stevesouders.com/hpws/rules.php>`_
-* See `django-templatecomponents <http://j03.de/projects/django-hashedmedia/>`_ to speed up your loading times even further.
+* See `django-hashedmedia <http://j03.de/projects/django-hashedmedia/>`_ to speed up your loading times even further.
 
 License
 -------
